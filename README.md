@@ -3,7 +3,7 @@
 Simple 135 line script to replace strings (variables) among many files with a YAML config. Perfect for any CI\CD like in a Dockerfile or a pre-build etc.
 
 # How to use:
-`[env1="Environment Value"] python3 mass_string_replacer.py "path\to\file" [--wet] [--silent]`
+`[env1="Environment Value"] python3 mass_string_replacer.py "path\to\yaml" [--wet] [--silent]`
 
 1. Install yaml from [PyYAML](http://pyyaml.org/wiki/PyYAMLDocumentation) for python with `pip[3] install PyYaml` 
 2. Flags: 
