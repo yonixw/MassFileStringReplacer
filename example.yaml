@@ -1,0 +1,28 @@
+randoms:
+    secret1:
+        source: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^&*()"
+        length: 20
+
+vars:
+    v1 : "I am var 1"
+    v2 : "I am var 2"
+
+# Actions are executed by array order
+# Variable\randoms will replace "~{v1}" by v1
+actions:
+    -   path: "./source.txt"
+        text:
+            "SOME_VAR"  : "<Simple Text \"Replace\">"
+            DOUBLE_VAR : "~{v1}" # Var are evaluated after text
+        regex:
+            "[0-9]{9,12}": "<Telephone Cencored>"
+        vars: # also, Env variables
+            - v1
+            - v2
+            - v3 # Won't find
+            - env1 # Will be read from env if exists
+        randoms:
+            - secret1
+    -   path: "./source2.txt"
+        vars:
+            - v1

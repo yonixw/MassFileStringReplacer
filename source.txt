@@ -1,0 +1,7 @@
+1) Read from environment: ~{env1}
+2) v1 : ~{v1}
+3) v2 : ~{v2}
+4) replace other format : SOME_VAR
+5) Make secrets\pass on the go : "~{secret1}"
+6) Ooops, My telephone is: 972526786799
+7) Double replace DOUBLE_VAR
