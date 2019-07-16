@@ -120,7 +120,7 @@ def processYAML(config : Config):
                     file.truncate(0)
                     file.write(fileText)
             else:
-                p(fileText)
+                p("Result:\n" + fileText + "\n\n")
         else:
             p("Can't find file '" + action.path + "'")
 
@@ -128,7 +128,7 @@ def p(s : str):
     if not silent:
         print("[*] " + s);
 
-config = Config.fromDict(loadYAML("example.yaml"));
+config = Config.fromDict(loadYAML(sys.argv[1]));
 dryRun:bool = not "--wet" in sys.argv
 silent:bool = "--silent" in sys.argv
 
