@@ -9,17 +9,24 @@ import sys
 class RandomString:
     source : str = ""
     length : int = 0
+    remember : bool = False
+
+    myResult = ""
 
     def fromDict(d : dict) -> 'RandomString' :
         result = RandomString();
         result.source = d.get('source',"");
         result.length = d.get('length', 0);
+        result.once = d.get('remember', False);
         return result;
 
     def newRandom(self) -> str:
         if self.source == "":
             return ""
-        return ''.join(random.choice(self.source) for i in range(self.length))
+        
+        if self.myResult == "" or not self.once:
+            self.myResult = ''.join(random.choice(self.source) for i in range(self.length))
+        return self.myResult;
 
 class Action:
     path : str = ""

@@ -19,6 +19,10 @@ randoms:
     secret1:
         source: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^&*()"
         length: 20
+    secret2:
+        source: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^&*()"
+        length: 20
+        remember: true # Between files, in same file always.
 
 vars:
     v1 : "I am var 1"
@@ -32,7 +36,7 @@ actions:
             "SOME_VAR"  : "<Simple Text \"Replace\">"
             DOUBLE_VAR : "~{v1}" # Var are evaluated after text
         regex:
-            "[0-9]{9,12}": "<Telephone Censored>"
+            "[0-9]{9,12}": "<Telephone Cencored>"
         vars: # also, Env variables
             - v1
             - v2
@@ -40,9 +44,13 @@ actions:
             - env1 # Will be read from env if exists
         randoms:
             - secret1
+            - secret2
     -   path: "./source2.txt"
         vars:
             - v1
+        randoms:
+            - secret1
+            - secret2
 ```
 
 Assuming using these 2 files:
@@ -54,6 +62,7 @@ Assuming using these 2 files:
 3) v2 : ~{v2}
 4) replace other format : SOME_VAR
 5) Make secrets\pass on the go : "~{secret1}"
+5.1) Make secrets\pass and remember between files : "~{secret2}"
 6) Ooops, My telephone is: 972526786799
 7) Double replace DOUBLE_VAR
 ```
@@ -61,6 +70,7 @@ Assuming using these 2 files:
 * source2.txt
 ```
 Just replace ~{v1}
+Remember secret? "~{secret2}"
 ```
 
 Given environment variable `env1="Im env1!!"` The dry-run result will look like:
@@ -72,7 +82,8 @@ Given environment variable `env1="Im env1!!"` The dry-run result will look like:
 2) v1 : I am var 1
 3) v2 : I am var 2
 4) replace other format : <Simple Text "Replace">
-5) Make secrets\pass on the go : "!sbEcIo2R~AGkR&3tDBU"
+5) Make secrets\pass on the go : "!z#Hjv^D1JsbC8oAa@QQ"
+5.1) Make secrets\pass and remember between files : "OgHNpXjtL)76vXPU7pIX"
 6) Ooops, My telephone is: <Telephone Cencored>
 7) Double replace I am var 1
 
@@ -80,4 +91,5 @@ Given environment variable `env1="Im env1!!"` The dry-run result will look like:
 [*] Procesing file './source2.txt'
 [*] Result:
 Just replace I am var 1
+Remember secret? "OgHNpXjtL)76vXPU7pIX"
 ```

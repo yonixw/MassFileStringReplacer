@@ -3,5 +3,6 @@
 3) v2 : ~{v2}
 4) replace other format : SOME_VAR
 5) Make secrets\pass on the go : "~{secret1}"
+5.1) Make secrets\pass and remember between files : "~{secret2}"
 6) Ooops, My telephone is: 972526786799
 7) Double replace DOUBLE_VAR

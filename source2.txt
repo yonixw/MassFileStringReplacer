@@ -1,1 +1,2 @@
 Just replace ~{v1}
+Remember secret? "~{secret2}"
