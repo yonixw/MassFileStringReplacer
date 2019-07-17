@@ -9,6 +9,11 @@ Simple 135 line script to replace strings (variables) among many files with a YA
 2. Flags: 
     * `--wet` Replace data in files. Otherwise just print result to stdout (dry-run)
     * `--silent` Don't print any processing info to stdout
+3. Order of execution in each file, for advanced usage:
+    * `text` replace
+    * `regex` replace
+    * `vars` replace (try to find locally before loading from env)
+    * `randoms` replace
 
 # Examples:
 
