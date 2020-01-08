@@ -79,8 +79,14 @@ def loadYAML(path: str):
 def replaceString(text: str, src : str, dst :str) -> str:
     return text.replace(src, dst)
 
+def textMatchCount(text : str, src : str) -> int:
+    return text.count(src);
+
 def replaceRegex(text: str, regex : str, dst : str) -> str:
     return re.sub(regex, dst,text)
+
+def regexMatchCount(text : str, regex : str) -> int:
+    return len(re.findall(regex,text));
 
 def processYAML(config : Config):
     action: Action
@@ -92,35 +98,57 @@ def processYAML(config : Config):
 
             # Simple text replace:
             textKey: str
+            simple_replace_count = 0
             for textKey in action.text.keys():
+                simple_replace_count += textMatchCount(fileText, textKey);
                 fileText = replaceString(fileText, textKey, action.text[textKey]);
+            
+            if simple_replace_count > 0:
+                d("Replaced " + str(simple_replace_count) + " simple text")
 
             # Regex replace:
             regexKey: str
+            regex_replace_count = 0
             for regexKey in action.regex.keys():
+                regex_replace_count += regexMatchCount(fileText, regexKey);
                 fileText = replaceRegex(fileText, regexKey, action.regex[regexKey])
+
+            if regex_replace_count > 0:
+                d("Replaced " + str(regex_replace_count) + " regexes")
 
             # Replace vars:
             varKey: str
+            var_given_count = 0
+            var_env_count = 0
+
             for varKey in action.vars:
                 if varKey in config.vars:
+                    var_given_count += textMatchCount(fileText, "~{" + varKey + "}");
                     fileText = replaceString(fileText, "~{" + varKey + "}", config.vars[varKey])
                 else:
                     # Try to read it from env:
                     noEnv: str = "_ ` - _ ` - ` _ ` - ` _ ` - ` _ ` - ` _ ` - ` _ ` - ` _ ` -"
                     envValue: str = os.getenv(varKey, noEnv)
                     if not envValue == noEnv:
+                        var_env_count += textMatchCount(fileText, "~{" + varKey + "}");
                         fileText = replaceString(fileText, "~{" + varKey + "}", envValue)
                     else:
-                        p("Can't find variable/env named '" + varKey + "'")
+                        d("Can't find variable/env named '" + varKey + "'","[ERR]")
+            if var_env_count + var_given_count > 0:
+                d("Replaced " + str(var_given_count) + " given var, " + str(var_env_count) + " from env.");
 
             # Replace randoms:
             randKey: str
+            rand_count = 0
             for randKey in action.randoms:
                 if randKey in config.randoms:
+                    rand_count +=  textMatchCount(fileText, randKey);
                     fileText = replaceString(fileText, "~{" + randKey + "}", config.randoms[randKey].newRandom())
                 else:
-                    p("Can't find random named '" + randKey + "'")
+                    d("Can't find random named '" + randKey + "'", "[ERR]")
+
+            if rand_count > 0:    
+                d("Replaced " + str(rand_count) + " randoms")
 
             if not dryRun:
                 with open(action.path, 'w') as file:
@@ -131,9 +159,13 @@ def processYAML(config : Config):
         else:
             p("Can't find file '" + action.path + "'")
 
-def p(s : str):
+def p(s : str): # log path
     if not silent:
         print("[*] " + s);
+
+def d(s : str, prefix : str = "-"): # log detail
+    if not silent:
+        print("\t" + prefix + " " + s);
 
 config = Config.fromDict(loadYAML(sys.argv[1]));
 dryRun:bool = not "--wet" in sys.argv
