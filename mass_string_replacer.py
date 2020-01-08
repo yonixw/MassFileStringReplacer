@@ -4,7 +4,7 @@ import random
 import os
 import re
 import sys
-
+from shutil import copyfile
 
 class RandomString:
     source : str = ""
@@ -92,8 +92,15 @@ def processYAML(config : Config):
     action: Action
     for action in config.actions:
         if os.path.isfile(action.path):
+            readPath = action.path
+            if usebackups:
+                readPath = action.path + ".rep.backup";
+                if not os.path.exists(readPath):
+                    copyfile(action.path, readPath)
+                
+
             p("Procesing file '" + action.path + "'")
-            with open(action.path, 'r') as file:
+            with open(readPath, 'r') as file:
                 fileText: str = file.read()
 
             # Simple text replace:
@@ -170,6 +177,7 @@ def d(s : str, prefix : str = "-"): # log detail
 config = Config.fromDict(loadYAML(sys.argv[1]));
 dryRun:bool = not "--wet" in sys.argv
 silent:bool = "--silent" in sys.argv
+usebackups:bool = "--backup" in sys.argv and not dryRun
 
 processYAML(config);
 
