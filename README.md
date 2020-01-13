@@ -9,7 +9,7 @@ Simple 135 line script to replace strings (variables) among many files with a YA
 2. Flags: 
     * `--wet` Replace data in files. Otherwise just print result to stdout (dry-run)
     * `--silent` Don't print any processing info to stdout
-    * `--backup` Keep backup of original file so you can replace again (good if used inside a docker)
+    * `--backup` Keep backup of original file so you can replace again (good if used inside a docker with mounted files)
 3. Order of execution in each file, for advanced usage:
     * `text` replace
     * `regex` replace
