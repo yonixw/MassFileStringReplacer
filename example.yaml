@@ -1,3 +1,5 @@
+randomseed: 290120200138 # Optional Number seed for all random 
+
 randoms:
     secret1:
         source: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^&*()"

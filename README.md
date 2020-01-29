@@ -21,6 +21,8 @@ Simple 135 line script to replace strings (variables) among many files with a YA
 Given example YAML file:
 
 ```yaml
+randomseed: 290120200138 # Optional Number seed for all random 
+
 randoms:
     secret1:
         source: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^&*()"

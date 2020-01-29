@@ -49,6 +49,7 @@ class Action:
         return result;
 
 class Config:
+    randomseed : int
     randoms : typing.Dict[str,RandomString]
     vars : dict = {}
     actions = typing.List[Action]
@@ -57,6 +58,8 @@ class Config:
         result = Config();
         result.vars = d.get('vars', {});
 
+        result.randomseed = d.get('randomseed', None);
+        random.seed(result.randomseed,version=2);
         result.randoms = {};
         randomDict : dict = d.get('randoms', {});
         for key in randomDict.keys():
