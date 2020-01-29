@@ -9,7 +9,7 @@ from shutil import copyfile
 class RandomString:
     source : str = ""
     length : int = 0
-    remember : bool = False
+    once : bool = False
 
     myResult = ""
 
@@ -64,6 +64,7 @@ class Config:
         randomDict : dict = d.get('randoms', {});
         for key in randomDict.keys():
             result.randoms[key] = RandomString.fromDict(randomDict[key]);
+            result.randoms[key].newRandom()
 
         result.actions = [];
         for actionObj in d.get('actions', []):
