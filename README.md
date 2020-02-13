@@ -59,6 +59,7 @@ actions:
         randoms:
             - secret1
             - secret2
+    #-   path: "./*.txt" # pattern supported by glob.glob() function            
 ```
 
 Assuming using these 2 files:
