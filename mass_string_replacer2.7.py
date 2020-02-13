@@ -4,6 +4,7 @@ import os
 import re
 import sys
 from shutil import copyfile
+import glob
 
 class RandomString:
     source = ""
@@ -77,8 +78,8 @@ class Config:
 def loadYAML(path):
     with open(path, 'r') as stream:
         try:
-            return yaml.safe_load(stream);
-        except yaml.YAMLError as ex:
+            return yaml_27.safe_load(stream);
+        except yaml_27.YAMLError as ex:
             print(ex);
             return None;
 
@@ -96,76 +97,79 @@ def regexMatchCount(text , regex ) :
 
 def processYAML(config ):
     for action in config.actions:
-        if os.path.isfile(action.path):
-            readPath = action.path
-            if usebackups:
-                readPath = action.path + ".rep.backup";
-                if not os.path.exists(readPath):
-                    copyfile(action.path, readPath)
+        p("Procesing file pattern '" + action.path + "'")
+        file_list = glob.glob(action.path);
+        for file_path_item in file_list:
+            if os.path.isfile(file_path_item):
+                readPath = file_path_item
+                if usebackups:
+                    readPath = file_path_item + ".rep.backup";
+                    if not os.path.exists(readPath):
+                        copyfile(file_path_item, readPath)
+                    
+
+                p("Procesing file '" + file_path_item + "'")
+                with open(readPath, 'r') as file:
+                    fileText = file.read()
+
+                # Simple text replace:
+                simple_replace_count = 0
+                for textKey in action.text.keys():
+                    simple_replace_count += textMatchCount(fileText, textKey);
+                    fileText = replaceString(fileText, textKey, action.text[textKey]);
                 
+                if simple_replace_count > 0:
+                    d("Replaced " + str(simple_replace_count) + " simple text")
 
-            p("Procesing file '" + action.path + "'")
-            with open(readPath, 'r') as file:
-                fileText = file.read()
+                # Regex replace:
+                regex_replace_count = 0
+                for regexKey in action.regex.keys():
+                    regex_replace_count += regexMatchCount(fileText, regexKey);
+                    fileText = replaceRegex(fileText, regexKey, action.regex[regexKey])
 
-            # Simple text replace:
-            simple_replace_count = 0
-            for textKey in action.text.keys():
-                simple_replace_count += textMatchCount(fileText, textKey);
-                fileText = replaceString(fileText, textKey, action.text[textKey]);
-            
-            if simple_replace_count > 0:
-                d("Replaced " + str(simple_replace_count) + " simple text")
+                if regex_replace_count > 0:
+                    d("Replaced " + str(regex_replace_count) + " regexes")
 
-            # Regex replace:
-            regex_replace_count = 0
-            for regexKey in action.regex.keys():
-                regex_replace_count += regexMatchCount(fileText, regexKey);
-                fileText = replaceRegex(fileText, regexKey, action.regex[regexKey])
+                # Replace vars:
+                var_given_count = 0
+                var_env_count = 0
 
-            if regex_replace_count > 0:
-                d("Replaced " + str(regex_replace_count) + " regexes")
-
-            # Replace vars:
-            var_given_count = 0
-            var_env_count = 0
-
-            for varKey in action.vars:
-                if varKey in config.vars:
-                    var_given_count += textMatchCount(fileText, "~{" + varKey + "}");
-                    fileText = replaceString(fileText, "~{" + varKey + "}", config.vars[varKey])
-                else:
-                    # Try to read it from env:
-                    noEnv = "_ ` - _ ` - ` _ ` - ` _ ` - ` _ ` - ` _ ` - ` _ ` - ` _ ` -"
-                    envValue = os.getenv(varKey, noEnv)
-                    if not envValue == noEnv:
-                        var_env_count += textMatchCount(fileText, "~{" + varKey + "}");
-                        fileText = replaceString(fileText, "~{" + varKey + "}", envValue)
+                for varKey in action.vars:
+                    if varKey in config.vars:
+                        var_given_count += textMatchCount(fileText, "~{" + varKey + "}");
+                        fileText = replaceString(fileText, "~{" + varKey + "}", config.vars[varKey])
                     else:
-                        d("Can't find variable/env named '" + varKey + "'","[ERR]")
-            if var_env_count + var_given_count > 0:
-                d("Replaced " + str(var_given_count) + " given var, " + str(var_env_count) + " from env.");
+                        # Try to read it from env:
+                        noEnv = "_ ` - _ ` - ` _ ` - ` _ ` - ` _ ` - ` _ ` - ` _ ` - ` _ ` -"
+                        envValue = os.getenv(varKey, noEnv)
+                        if not envValue == noEnv:
+                            var_env_count += textMatchCount(fileText, "~{" + varKey + "}");
+                            fileText = replaceString(fileText, "~{" + varKey + "}", envValue)
+                        else:
+                            d("Can't find variable/env named '" + varKey + "'","[ERR]")
+                if var_env_count + var_given_count > 0:
+                    d("Replaced " + str(var_given_count) + " given var, " + str(var_env_count) + " from env.");
 
-            # Replace randoms:
-            rand_count = 0
-            for randKey in action.randoms:
-                if randKey in config.randoms:
-                    rand_count +=  textMatchCount(fileText, randKey);
-                    fileText = replaceString(fileText, "~{" + randKey + "}", config.randoms[randKey].newRandom())
+                # Replace randoms:
+                rand_count = 0
+                for randKey in action.randoms:
+                    if randKey in config.randoms:
+                        rand_count +=  textMatchCount(fileText, randKey);
+                        fileText = replaceString(fileText, "~{" + randKey + "}", config.randoms[randKey].newRandom())
+                    else:
+                        d("Can't find random named '" + randKey + "'", "[ERR]")
+
+                if rand_count > 0:    
+                    d("Replaced " + str(rand_count) + " randoms")
+
+                if not dryRun:
+                    with open(file_path_item, 'w') as file:
+                        file.truncate(0)
+                        file.write(fileText)
                 else:
-                    d("Can't find random named '" + randKey + "'", "[ERR]")
-
-            if rand_count > 0:    
-                d("Replaced " + str(rand_count) + " randoms")
-
-            if not dryRun:
-                with open(action.path, 'w') as file:
-                    file.truncate(0)
-                    file.write(fileText)
+                    p("Result:\n" + fileText + "\n\n")
             else:
-                p("Result:\n" + fileText + "\n\n")
-        else:
-            p("Can't find file '" + action.path + "'")
+                p("Can't find file '" + file_path_item + "'")
 
 def p(s ): # log path
     if not silent:
