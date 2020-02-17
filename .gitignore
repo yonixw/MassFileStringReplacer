@@ -1,3 +1,4 @@
 .idea/
 yaml/*.pyc
+yaml_27/*.pyc
 *__pycache__*
